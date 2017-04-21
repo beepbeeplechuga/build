@@ -137,14 +137,16 @@ def get_revision(manifest=None, p="build"):
     return revision.replace('refs/heads/', '').replace('refs/tags/', '')
 
 
-def get_from_manifest(device_name):
-    for man in (custom_local_manifest, default_manifest):
-        man = load_manifest(man)
-        for local_path in man.findall("project"):
-            lp = local_path.get("path").strip('/')
-            if lp.startswith("device/") and lp.endswith("/" + device_name):
-                return lp
-    return None
+def get_from_manifest(devicename):
+    try:
+        lm = ElementTree.parse(".repo/local_manifests/du_manifest.xml")
+        lm = lm.getroot()
+    except:
+        lm = ElementTree.Element("manifest")
+
+    for localpath in lm.findall("project"):
+        if re.search("android_device_.*_%s$" % device, localpath.get("name")):
+            return localpath.get("path")
 
 
 def is_in_manifest(project_path):
